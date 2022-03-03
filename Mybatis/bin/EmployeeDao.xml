@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+默认mybatis自动封装结果集
+	1),按照列名和属性名一一对应的规则,不区分大小写
+	2),如果不对应
+		2.1),开启驼峰命名法
+		2.2),起别名
+		2.3),自定义结果集
+ --> 
+<!--知识点1: namespace:名称空间,写接口的全类名,
+相当于告诉mybtais这个配置是实现哪个接口的 -->
+<mapper namespace="com.atguigu.dao.EmployeeDao">
+
+<!--知识点2:
+<cache></cache> ,缓存相关 ,开启二级缓存
+<parameterMap type="" id=""> 已废弃,做复杂参数映射
+<sql id="">重复sql </sql>  
+
+ #{} 是参数预编译的方式,参数的位置都是用?代替,只有参数位置支持预编译
+ ${}:不是参数预编译形式,而是直接和sql语句进行拼接,不安全
+ ${} 的使用场景 select * from ${table_name]
+-->
+
+<!-- SELECT 标签属性
+id:方法名;对于某个方法的实现
+result type;指定方法运行后的返回值类型,查询操作必须指定
+id=#{id};代表取出传递过来的某个参数的值
+databaseId=指定数据库名,根据不同的数据库连接,执行不同的SQL语句
+-->
+<!--1.一个参数接口方法 	public Employee getEmpById(Integer id); -->
+<select id="getEmpById" resultType="com.atguigu.bean.Employee" databaseId="mysql">
+<!-- 只有一个参数,参数取值可以随便写 -->
+select * from t_employee where id=#{haha}
+</select>
+<select id="getEmpById" resultType="com.atguigu.bean.Employee" databaseId="orcl">
+select * from t_employee where id=#{id}
+</select>
+
+<!--2.多参数接口方法 public Employee getEmpByIdAndEmpName(Integer id,String empName); -->
+<select id="getEmpByIdAndEmpName" resultType="com.atguigu.bean.Employee" >
+ <!--方式1 -->
+select * from t_employee where id=#{0} and empname=#{1}
+ <!--方式2 
+select * from t_employee where id=#{param1} and empname=#{param2} -->
+</select>
+
+<!--3.注解接口方法 public Employee getEmpByIdAndEmpNameAnnotation(@Param("id")Integer id,@Param("empName")String empName); -->
+<select id="getEmpByIdAndEmpNameAnnotation" resultType="com.atguigu.bean.Employee" >
+select * from t_employee where id=#{id} and empname=#{empName} 
+</select>
+
+<!--4.Map参数接口方法 public Employee getEmpByMap(Map<String,Object> map); -->
+<select id="getEmpByMap" resultType="com.atguigu.bean.Employee" >
+select * from t_employee where id=#{id} and empname=#{empName}
+</select>
+ 
+ <!--5.返回一条数据的Map返回值
+ public Map<String,Object> getEmpByIdReturnMap(Integer id); -->
+ <select id="getEmpByIdReturnMap" resultType="map">
+ select * from t_employee where id=#{id}
+ </select> 
+ <!--6. 返回多条数据的Map返回值,接口上标注@MapKey("id"),指定那个属性为map的key
+ @MapKey("id")
+ public Map<Integer,Employee> getAllEmpsReturnMap();
+ resultType是map对象value的类型  -->
+ <select id="getAllEmpsReturnMap" resultType="com.atguigu.bean.Employee">
+ select * from t_employee 
+ </select>
+ <!--7.如果返回的是集合类型, resultType里面填写的是集合里对象的类型 -->
+ <select id="getAllEmps" resultType="com.atguigu.bean.Employee">
+ select * from t_employee 
+ </select>
+
+<!-- UPDATE标签 ************************************************************ -->
+ <!--传入POJO, #{属性} -->
+<update id="updateEmployee">
+	UPDATE t_employee
+	SET empname=#{empName},
+	gender=#{gender},
+	email=#{email}
+	where id=#{id}
+</update>
+
+<!-- DELETE标签 ************************************************************ -->
+<delete id="deleteEmployee">
+DELETE FROM t_employee  where id=#{id}
+</delete >
+
+<!-- INSERT标签 ************************************************************ -->
+ <!--传入POJO, #{属性} -->
+<insert id="insertEmployee">
+	INSERT INTO t_employee(empname,gender,email)
+	values(#{empName},#{gender},#{email})
+</insert>
+<!-- //重点:获取自增id,获取插入的员工的id-->
+<!-- 方式一 -->
+<insert id="insertEmployee1" useGeneratedKeys="true" keyProperty="id">
+	INSERT INTO t_employee(empname,gender,email)
+	values(#{empName},#{gender},#{email})
+</insert>
+<!-- 方式二 -->
+<insert id="insertEmployee2">
+	<selectKey order="BEFORE" resultType="integer" keyProperty="id">
+	select max(id)+1 from t_employee
+	</selectKey>
+	INSERT INTO t_employee(id,empname,gender,email)
+	values(#{id},#{empName},#{gender},#{email})
+</insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

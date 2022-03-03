@@ -1,0 +1,15 @@
+一级缓存默认存在,每个sqlsession自己都保存了一级缓存,只要之前查询过的数据,mybatis就会保存起来,下次直接从缓存拿
+一级失效:不同的sqlsession对象
+		同一个方法,不同的参数,由于之前没查过,往后发新的sql
+		在这个sqlsession期间执行上任何一次增删改操作 增删改会把缓存清空
+		手动清除缓存sqlsession.clearCACHE
+二级缓存:<namespace级别,跨sqlsession级别>
+	默认不开启.需要手动配置
+	缓存实现需要pojo实现serializable接口
+	二级缓存 在sqlsession关闭或提交后才会生效
+二级使用步骤:
+	1.全局配置文件中开启二级缓存,<setting name="cacheEnabled" value ="true">			
+	2.需要使用二级缓存的映射文件处使用cache配置缓存<cache/> <cache></cache>	
+	清除缓存:<select flushCache="true"></select>
+	注意:pojo 需要实现serializable接口
+	任何时候都是先看二级缓存，再看一级缓存,如果没有就去查数据库

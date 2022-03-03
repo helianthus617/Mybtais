@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.atguigu.dao.LockDao">
+		
+<!--自定义封装规则	,使用级联属性封装联合查询出的结果 方式1  -->
+	<resultMap type="com.atguigu.bean.Lock" id="any2">
+	<id property="id" column="id"/>
+	<result property="lockName" column="lockName" />
+	<!--collection   处理集合类型
+	properties 指定哪个属性是集合类型
+	ofType= 指定集合里面元素的类型
+	-->
+	<collection property="keys" ofType="com.atguigu.bean.Key">
+	<id property="id" column="kid"/>
+	<result  property="keyName" column="keyname" />
+	</collection>
+	</resultMap>	
+<select id="getLockById" resultMap="any2">
+	SELECT l.*,k.id kid,k.`keyname`,k.`lockid` FROM
+	t_lock l
+	LEFT JOIN t_key k ON l.`id`=k.`lockid`
+	WHERE l.id=#{hha}
+</select>
+	
+	
+	
+	
+ 
+<!-- 测试分布查询集合  -->
+<select id="getLockByIdByStep" resultMap="mylockstep">
+SELECT * FROM t_lock where id=#{id}
+</select>
+<resultMap type="com.atguigu.bean.Lock" id="mylockstep">
+	<id property="id" column="id"></id>
+	<result property="lockName" column="lockName"/>
+	<collection property="keys" 
+	select="com.atguigu.dao.KeyDao.getKeysByLockIdSimple"
+	column="id"
+	></collection>
+</resultMap>
+
+<select id="getLockByIdSimple" resultType="com.atguigu.bean.Lock">
+select * from t_lock where id=#{id}
+</select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

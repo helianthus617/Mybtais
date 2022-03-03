@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.CatDao">
+<!-- public Cat getCatById(Integer id); -->
+	<!-- 自定义结果集
+	id=唯一标识
+	type指定为哪个javabean自定义封装规则
+	 -->
+	<resultMap type="com.atguigu.bean.Cat" id="any">
+	<!-- id指定主键列
+	property javabean中的属性
+	column 	数据库查出的列 -->
+	<id property="id" column="id"/>
+	<!-- 普通列 -->
+	<result property="name" column="cName" />
+	<result property="age" column="cAge" />
+	<result property="gender" column="cgender " />
+	</resultMap>
+	
+<!--public List<Cat> getCatByCondition(Cat cat); -->
+<select id="getCatByCondition" resultMap="any">
+select * from t_cat 
+<!-- 将where条件放到 where标签体中,
+自动处理 and ,该and必须在条件之前-->
+<where>
+	<!-- if,传过来的javabean对象中的属性id是否为空 -->
+	<if test="id!=null">
+	id > #{id} 
+	</if>
+	<if test="name!=null">
+	and cName like #{name} 
+	</if>
+	<if test="age!=null">
+	and cAge &lt; #{age} 
+	</if>
+</where>
+</select>
+
+<!--public List<Cat> getCatByCondition1(Cat cat); -->
+<select id="getCatByCondition1" resultMap="any">
+select * from t_cat 
+<!-- trim
+	prefix="" 前缀;为我们下面的sql 整体添加一个前缀
+	prefixOverides="" 取出整体字符串前面多余的字符
+suffix=""
+suffixOverrides=  取出整体字符串后面多余的字符
+ -->
+<trim 
+prefix="where" 
+prefixOverrides="and"
+suffixOverrides="and"
+>
+	<!-- if,传过来的javabean对象中的属性id是否为空 -->
+	<if test="id!=null">
+	id > #{id} 
+	</if>
+	<if test="name!=null">
+	and cName like #{name} 
+	</if>
+	<if test="age!=null">
+	and cAge &lt; #{age} 
+	</if>
+	
+</trim>
+</select>
+
+<!-- public List<Cat> getCatByIdIn(@Param("ids")List<Integer> ids);-->
+<select id="getCatByIdIn" resultMap="any">
+select * from t_cat where id in
+<!-- 
+collection="ids"  遍历的集合keys
+close=""  以什么结束
+index="" 索引,
+如果遍历的是个list,index保存当前的索引
+如果遍历的是个map,index保存当前的key
+item="" 变量名
+open="" 以什么开始
+separator="" 每次遍历的元素分隔符
+ -->
+<foreach
+ collection="ids"
+  separator=","  
+  open="("  
+  close=")" 
+  item="id_item">
+#{id_item}
+</foreach>
+</select>
+
+<sql id="selectSql">select * from t_cat </sql>
+<select id="getCatByCondition2" resultMap="any">
+<bind name="_name" value="%+name+%"/>
+<include refid="selectSql"></include>
+<where>
+	<choose>
+		<when test="id!=null">
+		id=#{id}
+		</when>
+		<when test="age!=null">
+		 cAge &lt; #{age} 
+		</when>
+		<otherwise>
+		1=1
+		</otherwise>
+	</choose>
+</where>
+</select>
+
+<!-- 	  public int updateCat(Cat teacher); -->
+<update id="updateCat">
+	UPDATE t_cat 
+	<!-- 处理多余的逗号 -->
+	<set>
+	<if test="name!=null">
+		 cName = #{name} ,
+	</if>
+	<if test="age!=null">
+		 cAge=#{age} ,
+	</if>
+	</set>
+</update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

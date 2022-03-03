@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- resource 从类路径下引用,
+	url 从磁盘路径或者网络路径 -->
+	<properties 
+	resource="dbconfig.properties">
+	</properties>
+
+	<settings>
+	<!-- 开启延迟加载开关,在执行分步查询时使用 
+	<setting name="lazyLoadingEnabled" value="true"/>
+	<setting name="aggressiveLazyLoading" value="false"/>-->
+	
+	<!-- 开启全局缓存开关(二级缓存) -->
+	<setting name="cacheEnabled" value="true"/>
+	
+	<!-- mapUnderscoreToCamelCase	
+	是否开启驼峰命名自动映射，即从经典数据库列名 A_COLUMN 映射到经典 Java 属性名 aColumn -->	
+	<setting name="mapUnderscoreToCamelCase" value="true"/>
+	</settings>
+	
+<typeAliases>	
+	<!-- 为Javabean起别名 ,默认别名就是类名 ,
+	alias属性指定自定义别名,但是不建议起别名-->	
+	<typeAlias type="com.atguigu.bean.Employee" alias="emp"/>
+	
+	<!-- package 批量起别名,指定包名,默认别名就是类名 ,如需自定义别名,在类上使用注解
+	@Alias("xxxx")
+	public class Employee -->
+	<package name="com.atguigu.bean"/>
+</typeAliases>	
+
+<environments default="test">
+<!-- default="test" 默认使用哪个环境 -->
+<!-- 数据源和事务控制都是spring进行设置 -->
+	<environment id="test">
+		<transactionManager type="JDBC"/>
+			<dataSource type="POOLED">
+			<property name="driver" value="com.mysql.jdbc.Driver"/>
+			<property name="url" value="jdbc:mysql://localhost:3306/mybatis_0325"/>
+			<property name="username" value="root"/>
+			<property name="password" value="rootroot"/>
+		</dataSource>
+	</environment>
+
+	<environment id="development">
+		<transactionManager type="JDBC"/>
+		<dataSource type="POOLED">
+			<property name="driver" value="${driver}"/>
+			<property name="url" value="${url}"/>
+			<property name="username" value="${username}"/>
+			<property name="password" value="${password}"/>
+		</dataSource>
+	</environment>
+</environments>
+
+<!-- databaseIdProvider 数据库移植配合标签体的databaseId使用
+<select id="getEmpById" resultType="com.atguigu.bean.Employee" databaseId="mysql">
+select * from t_employee where id=#{id}
+</select>-->
+ 
+<databaseIdProvider type="DB_VENDOR">
+<!-- name 数据库厂商,value 自定义名字 -->
+<property name="MySQL" value="mysql"/>
+<property name="Oracle" value="orcl"/>
+</databaseIdProvider>
+ 
+<mappers>
+<!--
+class用法:指定全类名  <mapper class="com.atguigu.bean.EmployeeDao"/>
+将接口类与EmployeeDao.xml文件同一目录下,并且文件名相同。
+class 另外一种用法 直接在类上标注注解,然后引用全类名
+@Delete("DELETE FROM t_employee  where id=#{id}")
+public boolean deleteEmployee(Integer id);
+ -->
+<mapper resource="EmployeeDao.xml"/>
+<mapper resource="KeyDao.xml"/>
+<mapper resource="LockDao.xml"/>
+<mapper resource="CatDao.xml"/>
+<mapper class="com.atguigu.dao.EmployeeAnnotation"/>
+ <!-- package 批量注册,name是包名
+ 	批量注册为两种类型,注解的接口类型 和 (接口+配置文件,两者必须同包)
+  -->
+<package name=""/>
+</mappers>
+
+
+</configuration>

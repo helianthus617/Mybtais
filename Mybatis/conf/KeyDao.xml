@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.KeyDao">
+
+<!--自定义封装规则	,使用级联属性封装联合查询出的结果 方式1  -->
+<resultMap type="com.atguigu.bean.Key" id="any1">
+<id property="id" column="id"/>
+<result property="keyName" column="keyname" />
+<result property="lock.id" column="lid" />
+<result property="lock.lockName" column="lockName" />
+</resultMap>
+<!--自定义封装规则	,使用级联属性封装联合查询出的结果 方式2  -->
+<resultMap type="com.atguigu.bean.Key" id="any2">
+<id property="id" column="id"/>
+<result property="keyName" column="keyname" />
+<association property="lock" javaType="com.atguigu.bean.Lock">
+<id property="id" column="lid"/>
+<result property="lockName" column="lockName"/> 
+</association>
+</resultMap>
+
+<select id="getKeyById" resultMap="any2">
+SELECT 
+k.id,
+k.`keyname`,
+k.`lockid`,
+l.`id` lid,
+l.`lockName`
+FROM t_key k
+LEFT JOIN t_lock l ON k.`lockid`=l.`id`
+WHERE k.`id`=#{id}	
+</select>
+
+
+<!-- 分步查询 -->
+<resultMap type="com.atguigu.bean.Key" id="key01">
+	<id property="id" column="id"/>
+	<result property="keyName" column="keyname"/>
+	<!-- 
+	告诉mybatis自己去调用一个查询
+	column:指定将哪一列作为参数查询
+	 -->
+	<association property="lock"
+	select="com.atguigu.dao.LockDao.getLockByIdSimple"
+	column="lockid"
+	fetchType="lazy" >
+	</association>
+</resultMap>
+
+<select id="getKeyBySteps" resultMap="key01">
+	select * from t_key where id=#{id}
+</select>
+
+
+<!--  public List<Key> getKeysByLockIdSimple(Integer id);-->
+<select id="getKeysByLockIdSimple" resultType="com.atguigu.bean.Key">
+select * from t_key where lockid=#{id}
+</select>
+
+
+
+</mapper>
